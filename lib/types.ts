@@ -1,5 +1,3 @@
-export type MeetingType = 'testimony' | 'regular' | 'stake' | 'general';
-
 export interface Hymn {
   number: number;
   title: string;
@@ -15,23 +13,33 @@ export interface WardBusinessItem {
   description: string;
 }
 
-export interface SacramentMeeting {
+interface MeetingBase {
   id: number;
   date: string; // ISO date string: 'YYYY-MM-DD'
-  meetingType: MeetingType;
   presiding: string;
   conducting: string;
-  location?: string;
-  announcements?: string[];
+  announcements: string[];
   openingHymn: Hymn;
   openingPrayer: string;
   wardBusiness: WardBusinessItem[];
   stakeBusiness: boolean;
-  sacramentHymn?: Hymn; // omitted for stake and general meetings, which do not administer the sacrament
   speakers: SpeakerItem[];
   closingHymn: Hymn;
   closingPrayer: string;
 }
+
+export interface WardMeeting extends MeetingBase {
+  meetingType: 'regular' | 'testimony';
+  sacramentHymn: Hymn;
+}
+
+export interface ConferenceMeeting extends MeetingBase {
+  meetingType: 'stake' | 'general';
+  location: string;
+}
+
+export type SacramentMeeting = WardMeeting | ConferenceMeeting;
+export type MeetingType = SacramentMeeting['meetingType'];
 
 export interface ApiError {
   error: string;

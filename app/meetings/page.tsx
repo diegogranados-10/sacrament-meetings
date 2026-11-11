@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import MeetingCard from '@/components/MeetingCard';
 import { fetchMeetings } from '@/lib/api';
-import { formatMeetingDate, isISODate, mostRecentSunday, todayISO } from '@/lib/dates';
+import { currentSundayISO, formatLongDate, isISODate } from '@/lib/dates';
 import type { SacramentMeeting } from '@/lib/types';
 
 export const metadata: Metadata = {
@@ -23,7 +23,7 @@ function MeetingGrid({ meetings, currentSunday }: { meetings: SacramentMeeting[]
 export default async function MeetingsPage({ searchParams }: PageProps<'/meetings'>) {
   const { missing } = await searchParams;
   const meetings = await fetchMeetings();
-  const currentSunday = mostRecentSunday(todayISO());
+  const currentSunday = currentSundayISO();
 
   const upcoming = meetings.filter((m) => m.date > currentSunday);
   const currentAndPast = meetings.filter((m) => m.date <= currentSunday).reverse();
@@ -38,7 +38,7 @@ export default async function MeetingsPage({ searchParams }: PageProps<'/meeting
 
       {missingDate && (
         <p role="alert" className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-900">
-          No program has been entered yet for Sunday, {formatMeetingDate(missingDate)}.
+          No program has been entered yet for Sunday, {formatLongDate(missingDate)}.
         </p>
       )}
 

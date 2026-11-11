@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import MeetingTypeBadge from './MeetingTypeBadge';
-import { formatMeetingDate } from '@/lib/dates';
+import { formatLongDate } from '@/lib/dates';
+import { MEETING_TYPES } from '@/lib/meeting-types';
 import type { SacramentMeeting } from '@/lib/types';
 
 interface MeetingCardProps {
@@ -31,7 +32,7 @@ export default function MeetingCard({ meeting, isCurrent = false }: MeetingCardP
           href={`/meetings/${meeting.id}`}
           className="text-foreground outline-none after:absolute after:inset-0 after:content-[''] hover:text-brand"
         >
-          <time dateTime={meeting.date}>{formatMeetingDate(meeting.date)}</time>
+          <time dateTime={meeting.date}>{formatLongDate(meeting.date)}</time>
         </Link>
       </h3>
 
@@ -42,11 +43,9 @@ export default function MeetingCard({ meeting, isCurrent = false }: MeetingCardP
         <dd>{meeting.conducting}</dd>
         <dt className="text-muted">Speakers</dt>
         <dd>
-          {meeting.meetingType === 'testimony'
-            ? 'Testimonies from the congregation'
-            : speakers.length > 0
-              ? speakers.map((s) => s.name).join(', ')
-              : 'To be announced'}
+          {speakers.length > 0
+            ? speakers.map((s) => s.name).join(', ')
+            : (MEETING_TYPES[meeting.meetingType].programIntro ?? 'To be announced')}
         </dd>
       </dl>
     </article>

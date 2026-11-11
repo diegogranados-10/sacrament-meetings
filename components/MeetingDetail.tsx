@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import MeetingTypeBadge from './MeetingTypeBadge';
-import { formatMeetingDate } from '@/lib/dates';
-import { isSacramentMeeting } from '@/lib/meeting-labels';
+import { formatLongDate } from '@/lib/dates';
+import { MEETING_TYPES } from '@/lib/meeting-types';
 import type { Hymn, SacramentMeeting, SpeakerItem } from '@/lib/types';
 import { WARD } from '@/lib/ward';
 
@@ -25,21 +25,15 @@ function HymnLine({ hymn }: { hymn: Hymn }) {
   );
 }
 
+const PROGRAM_ITEM_LABELS: Record<SpeakerItem['type'], string> = {
+  speaker: 'Speaker',
+  'musical-number': 'Musical number',
+};
+
 function ProgramItem({ item }: { item: SpeakerItem }) {
-  if (item.type === 'musical-number') {
-    return (
-      <li className="flex flex-col">
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted">Musical number</span>
-        <span>
-          {item.name}
-          {item.topic && <span className="text-muted"> — {item.topic}</span>}
-        </span>
-      </li>
-    );
-  }
   return (
     <li className="flex flex-col">
-      <span className="text-xs font-semibold uppercase tracking-wider text-muted">Speaker</span>
+      <span className="text-xs font-semibold uppercase tracking-wider text-muted">{PROGRAM_ITEM_LABELS[item.type]}</span>
       <span>
         {item.name}
         {item.topic && <span className="text-muted"> — {item.topic}</span>}
@@ -48,9 +42,19 @@ function ProgramItem({ item }: { item: SpeakerItem }) {
   );
 }
 
+function BulletList({ items, empty }: { items: string[]; empty: string }) {
+  if (items.length === 0) return <p className="text-muted">{empty}</p>;
+  return (
+    <ul className="list-disc space-y-1 pl-5">
+      {items.map((item) => (
+        <li key={item}>{item}</li>
+      ))}
+    </ul>
+  );
+}
+
 export default function MeetingDetail({ meeting }: { meeting: SacramentMeeting }) {
-  const announcements = meeting.announcements ?? [];
-  const sacrament = isSacramentMeeting(meeting.meetingType);
+  const type = MEETING_TYPES[meeting.meetingType];
 
   return (
     <article className="mx-auto max-w-2xl rounded-xl border border-line bg-surface p-6 shadow-sm sm:p-10 print:max-w-none print:border-0 print:p-0 print:shadow-none">
@@ -59,12 +63,12 @@ export default function MeetingDetail({ meeting }: { meeting: SacramentMeeting }
           {WARD.name} · {WARD.stake}
         </p>
         <h1 className="mt-1 font-serif text-3xl font-semibold">
-          <time dateTime={meeting.date}>{formatMeetingDate(meeting.date)}</time>
+          <time dateTime={meeting.date}>{formatLongDate(meeting.date)}</time>
         </h1>
         <div className="mt-3">
           <MeetingTypeBadge type={meeting.meetingType} />
         </div>
-        {meeting.location && <p className="mt-3 text-sm text-muted">{meeting.location}</p>}
+        {'location' in meeting && <p className="mt-3 text-sm text-muted">{meeting.location}</p>}
       </header>
 
       <dl className="mb-4 grid grid-cols-2 gap-4 rounded-lg bg-background p-4 text-sm print:bg-transparent">
@@ -79,15 +83,7 @@ export default function MeetingDetail({ meeting }: { meeting: SacramentMeeting }
       </dl>
 
       <ProgramSection title="Announcements">
-        {announcements.length > 0 ? (
-          <ul className="list-disc space-y-1 pl-5">
-            {announcements.map((announcement) => (
-              <li key={announcement}>{announcement}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-muted">No announcements</p>
-        )}
+        <BulletList items={meeting.announcements} empty="No announcements" />
       </ProgramSection>
 
       <ProgramSection title="Opening Hymn">
@@ -99,33 +95,23 @@ export default function MeetingDetail({ meeting }: { meeting: SacramentMeeting }
       </ProgramSection>
 
       <ProgramSection title="Ward Business">
-        {meeting.wardBusiness.length > 0 ? (
-          <ul className="list-disc space-y-1 pl-5">
-            {meeting.wardBusiness.map((item) => (
-              <li key={item.description}>{item.description}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-muted">No ward business</p>
-        )}
+        <BulletList items={meeting.wardBusiness.map((item) => item.description)} empty="No ward business" />
       </ProgramSection>
 
       <ProgramSection title="Stake Business">
         <p>{meeting.stakeBusiness ? 'Yes — stake business will be conducted' : 'None'}</p>
       </ProgramSection>
 
-      {sacrament && meeting.sacramentHymn && (
+      {'sacramentHymn' in meeting && (
         <ProgramSection title="Sacrament Hymn">
           <HymnLine hymn={meeting.sacramentHymn} />
           <p className="mt-1 text-sm italic text-muted">Administration of the sacrament</p>
         </ProgramSection>
       )}
 
-      <ProgramSection title={meeting.meetingType === 'testimony' ? 'Testimonies' : 'Speakers & Musical Numbers'}>
-        {meeting.meetingType === 'testimony' && (
-          <p className={meeting.speakers.length > 0 ? 'mb-3' : undefined}>
-            Bearing of testimonies by members of the congregation
-          </p>
+      <ProgramSection title={type.programHeading}>
+        {type.programIntro && (
+          <p className={meeting.speakers.length > 0 ? 'mb-3' : undefined}>{type.programIntro}</p>
         )}
         {meeting.speakers.length > 0 ? (
           <ol className="space-y-3">
@@ -134,7 +120,7 @@ export default function MeetingDetail({ meeting }: { meeting: SacramentMeeting }
             ))}
           </ol>
         ) : (
-          meeting.meetingType !== 'testimony' && <p className="text-muted">To be announced</p>
+          type.emptyProgram && <p className="text-muted">{type.emptyProgram}</p>
         )}
       </ProgramSection>
 

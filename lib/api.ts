@@ -9,8 +9,9 @@ async function apiUrl(path: string): Promise<string> {
   return `${protocol}://${host}${path}`;
 }
 
-export async function fetchMeetings(): Promise<SacramentMeeting[]> {
-  const response = await fetch(await apiUrl('/api/meetings'), { cache: 'no-store' });
+export async function fetchMeetings(date?: string): Promise<SacramentMeeting[]> {
+  const query = date ? `?date=${encodeURIComponent(date)}` : '';
+  const response = await fetch(await apiUrl(`/api/meetings${query}`), { cache: 'no-store' });
   if (!response.ok) {
     throw new Error(`GET /api/meetings failed with status ${response.status}`);
   }

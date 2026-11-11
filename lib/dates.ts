@@ -16,25 +16,25 @@ export function isISODate(value: string): boolean {
   return !Number.isNaN(date.getTime()) && toISODate(date) === value;
 }
 
-export function todayISO(timeZone: string = WARD.timeZone, now: Date = new Date()): string {
+export function todayISO(): string {
   const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone,
+    timeZone: WARD.timeZone,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-  }).formatToParts(now);
+  }).formatToParts(new Date());
   const part = (type: Intl.DateTimeFormatPartTypes) =>
     parts.find((p) => p.type === type)?.value ?? '';
   return `${part('year')}-${part('month')}-${part('day')}`;
 }
 
-export function mostRecentSunday(today: string): string {
-  const date = parseISODate(today);
+export function currentSundayISO(): string {
+  const date = parseISODate(todayISO());
   date.setUTCDate(date.getUTCDate() - date.getUTCDay());
   return toISODate(date);
 }
 
-export function formatMeetingDate(iso: string, style: 'long' | 'short' = 'long'): string {
+export function formatLongDate(iso: string, style: 'long' | 'short' = 'long'): string {
   return parseISODate(iso).toLocaleDateString('en-US', {
     timeZone: 'UTC',
     weekday: style === 'long' ? 'long' : 'short',

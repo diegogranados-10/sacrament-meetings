@@ -1,33 +1,18 @@
 import type { SacramentMeeting } from './types';
 
-type DefaultedField =
-  | 'meetingType'
-  | 'presiding'
-  | 'conducting'
-  | 'announcements'
-  | 'wardBusiness'
-  | 'stakeBusiness'
-  | 'speakers';
-
-type MeetingInput = Omit<SacramentMeeting, DefaultedField> &
-  Partial<Pick<SacramentMeeting, DefaultedField>>;
-
-const DEFAULT_MEETING: Pick<SacramentMeeting, DefaultedField> = {
-  meetingType: 'regular',
+const WARD_DEFAULTS = {
   presiding: 'Bishop Smith',
   conducting: 'Brother Jones',
   announcements: [],
   wardBusiness: [],
   stakeBusiness: false,
   speakers: [],
-};
-
-function createMeeting(input: MeetingInput): SacramentMeeting {
-  return { ...DEFAULT_MEETING, ...input };
-}
+} satisfies Partial<SacramentMeeting>;
 
 const meetings: SacramentMeeting[] = [
-  createMeeting({
+  {
+    ...WARD_DEFAULTS,
+    meetingType: 'regular',
     id: 1,
     date: '2026-05-03',
     openingHymn: { number: 2, title: 'The Spirit of God' },
@@ -41,8 +26,9 @@ const meetings: SacramentMeeting[] = [
     closingHymn: { number: 31, title: 'O God, Our Help in Ages Past' },
     closingPrayer: 'Brother Davis',
     announcements: ['Ward temple night: May 10'],
-  }),
-  createMeeting({
+  },
+  {
+    ...WARD_DEFAULTS,
     id: 2,
     date: '2026-10-04',
     meetingType: 'general',
@@ -58,8 +44,10 @@ const meetings: SacramentMeeting[] = [
     closingHymn: { number: 85, title: 'How Firm a Foundation' },
     closingPrayer: 'By assignment',
     announcements: ['No sacrament meeting in the ward building today'],
-  }),
-  createMeeting({
+  },
+  {
+    ...WARD_DEFAULTS,
+    meetingType: 'regular',
     id: 3,
     date: '2026-10-11',
     conducting: 'Brother Nguyen',
@@ -78,8 +66,9 @@ const meetings: SacramentMeeting[] = [
     closingHymn: { number: 98, title: 'I Need Thee Every Hour' },
     closingPrayer: 'Brother Chen',
     announcements: ['Trunk-or-treat in the church parking lot: October 30, 6:00 PM'],
-  }),
-  createMeeting({
+  },
+  {
+    ...WARD_DEFAULTS,
     id: 4,
     date: '2026-10-18',
     meetingType: 'stake',
@@ -96,8 +85,10 @@ const meetings: SacramentMeeting[] = [
     closingHymn: { number: 30, title: 'Come, Come, Ye Saints' },
     closingPrayer: 'Brother Silva',
     announcements: ['No meetings in the ward building today'],
-  }),
-  createMeeting({
+  },
+  {
+    ...WARD_DEFAULTS,
+    meetingType: 'regular',
     id: 5,
     date: '2026-10-25',
     conducting: 'Brother Nguyen',
@@ -117,8 +108,9 @@ const meetings: SacramentMeeting[] = [
       'Tithing declaration appointments begin November 1',
       'Youth service project: Saturday, 9:00 AM at the food bank',
     ],
-  }),
-  createMeeting({
+  },
+  {
+    ...WARD_DEFAULTS,
     id: 6,
     date: '2026-11-01',
     meetingType: 'testimony',
@@ -130,8 +122,10 @@ const meetings: SacramentMeeting[] = [
     closingHymn: { number: 241, title: 'Count Your Blessings' },
     closingPrayer: 'Brother Lee',
     announcements: ['Fast offerings may be given to any member of the bishopric'],
-  }),
-  createMeeting({
+  },
+  {
+    ...WARD_DEFAULTS,
+    meetingType: 'regular',
     id: 7,
     date: '2026-11-08',
     conducting: 'Brother Nguyen',
@@ -150,8 +144,10 @@ const meetings: SacramentMeeting[] = [
     closingHymn: { number: 94, title: 'Come, Ye Thankful People' },
     closingPrayer: 'Sister Williams',
     announcements: ['Ward Thanksgiving dinner: November 21, 6:00 PM in the cultural hall'],
-  }),
-  createMeeting({
+  },
+  {
+    ...WARD_DEFAULTS,
+    meetingType: 'regular',
     id: 8,
     date: '2026-11-15',
     conducting: 'Brother Jones',
@@ -164,13 +160,13 @@ const meetings: SacramentMeeting[] = [
     ],
     closingHymn: { number: 116, title: 'Come, Follow Me' },
     closingPrayer: 'Sister Okafor',
-  }),
+  },
 ];
 
+meetings.sort((a, b) => a.date.localeCompare(b.date));
+
 export function getMeetings(date?: string | null): SacramentMeeting[] {
-  const sorted = [...meetings].sort((a, b) => a.date.localeCompare(b.date));
-  if (date) return sorted.filter((m) => m.date === date);
-  return sorted;
+  return date ? meetings.filter((m) => m.date === date) : meetings;
 }
 
 export function getMeetingById(id: number): SacramentMeeting | null {

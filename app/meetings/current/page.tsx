@@ -1,13 +1,11 @@
 import { redirect } from 'next/navigation';
 import { connection } from 'next/server';
-import { mostRecentSunday, todayISO } from '@/lib/dates';
-import { getMeetings } from '@/lib/meetings-db';
+import { fetchMeetings } from '@/lib/api';
+import { currentSundayISO } from '@/lib/dates';
 
 export default async function CurrentMeetingPage() {
   await connection();
-  const sunday = mostRecentSunday(todayISO());
-  const [meeting] = getMeetings(sunday);
-
-  if (!meeting) redirect(`/meetings?missing=${sunday}`);
-  redirect(`/meetings/${meeting.id}`);
+  const sunday = currentSundayISO();
+  const [meeting] = await fetchMeetings(sunday);
+  redirect(meeting ? `/meetings/${meeting.id}` : `/meetings?missing=${sunday}`);
 }

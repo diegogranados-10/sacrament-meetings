@@ -4,12 +4,12 @@ import { notFound } from 'next/navigation';
 import MeetingDetail from '@/components/MeetingDetail';
 import PrintButton from '@/components/PrintButton';
 import { fetchMeeting } from '@/lib/api';
-import { formatMeetingDate } from '@/lib/dates';
+import { formatLongDate } from '@/lib/dates';
 
 export async function generateMetadata({ params }: PageProps<'/meetings/[id]'>): Promise<Metadata> {
   const { id } = await params;
   const meeting = await fetchMeeting(id);
-  return { title: meeting ? `Program for ${formatMeetingDate(meeting.date, 'short')}` : 'Meeting not found' };
+  return { title: meeting ? `Program for ${formatLongDate(meeting.date, 'short')}` : 'Meeting not found' };
 }
 
 export default async function MeetingPage({ params }: PageProps<'/meetings/[id]'>) {
